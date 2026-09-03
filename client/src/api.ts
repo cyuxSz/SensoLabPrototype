@@ -254,6 +254,24 @@ export async function updateProfile(): Promise<Snapshot> {
   return clone(CURRENT_SNAPSHOT);
 }
 
+export async function adminLogin(input: AdminLoginInput): Promise<{ ok: boolean; token: string }> {
+  return request<{ ok: boolean; token: string }>("/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+}
+
+export async function adminLogout(): Promise<{ ok: boolean }> {
+  return request<{ ok: boolean }>("/admin/logout", { method: "POST" });
+}
+
+export async function getAdminOverview(): Promise<AdminOverview> {
+  return request<AdminOverview>("/admin/overview", {
+    headers: { Authorization: getAdminAuthHeader() },
+  });
+}
+
 export async function adminCreateCircle(): Promise<CircleDefinition> {
   await delay(300);
   const c: CircleDefinition = { name: "Nuevo Círculo", description: "Creado demo", funFacts: [], limit: 100, memberCount: 0 };
@@ -287,11 +305,20 @@ export async function adminDeleteChatMessage(): Promise<{ ok: boolean }> {
 }
 
 const API_BASE = "/api";
-function getAuthHeader(): string | undefined {
-  const token = localStorage.getItem("authToken");
-  return token ? `Bearer ${token}` : undefined;
+function getAdminAuthHeader(): string {
+  const token = localStorage.getItem("adminToken");
+  return token ? `Bearer ${token}` : "";
 }
 
-async function request<T>(_path: string, _init?: RequestInit): Promise<T> {
-  throw new Error(`API call not mocked: ${_path}`);
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, init);
+  const data = await response.json().catch(() => null) as (T & { message?: string }) | null;
+
+  if (!response.ok) {
+    const message = data?.message || "No se pudo completar la solicitud.";
+    if (response.status === 401) throw new UnauthorizedError(message);
+    throw new Error(message);
+  }
+
+  return data as T;
 }
