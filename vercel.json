@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm run build --workspace=client",
-  "devCommand": "npm run dev --workspace=client",
+  "buildCommand": "cd client && npm install && npm run build",
+  "devCommand": "cd client && npm run dev",
   "installCommand": "npm install",
   "framework": "vite",
   "outputDirectory": "client/dist",
