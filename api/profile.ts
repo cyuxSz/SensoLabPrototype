@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { updateProfile } from "@server/data";
 import { parseAuthToken } from "@shared/auth";
+import { toNullableString } from "@shared/request";
 import { z } from "zod";
 
 const profileUpdateSchema = z.object({
@@ -18,7 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const parsed = profileUpdateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: "Revisa los datos del perfil e intenta de nuevo." });
   try {
-    const auth = parseAuthToken(req.headers.authorization);
+    const auth = parseAuthToken(toNullableString(req.headers.authorization));
     if (!auth || auth.isAdmin) return res.status(401).json({ message: "Inicia sesión para continuar." });
     const result = await updateProfile(auth.email, parsed.data);
     if (!result) return res.status(401).json({ message: "Inicia sesión para continuar." });

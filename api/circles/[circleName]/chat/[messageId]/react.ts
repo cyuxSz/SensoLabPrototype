@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { toggleReaction } from "@server/data";
 import { parseAuthToken } from "@shared/auth";
+import { toNullableString } from "@shared/request";
 import { REACTION_EMOJIS } from "@shared/types";
 import { z } from "zod";
 
@@ -11,10 +12,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const parsed = reactSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: "Reacción no válida." });
   try {
-    const auth = parseAuthToken(req.headers.authorization);
+    const auth = parseAuthToken(toNullableString(req.headers.authorization));
     if (!auth || auth.isAdmin) return res.status(401).json({ message: "Inicia sesión para continuar." });
-    const circleName = decodeURIComponent(req.query.circleName as string);
-    const messageId = req.query.messageId as string;
+    const rawCircleName = toNullableString(req.query.circleName);
+    if (!rawCircleName) return res.status(400).json({ message: "Falta el nombre del círculo." });
+    const messageId = toNullableString(req.query.messageId);
+    if (!messageId) return res.status(400).json({ message: "Falta el identificador del mensaje." });
+    const circleName = decodeURIComponent(rawCircleName);
     const result = await toggleReaction(auth.email, circleName, messageId, parsed.data.emoji);
     if (!result) return res.status(400).json({ message: "No se pudo registrar tu reacción." });
     res.json(result);
