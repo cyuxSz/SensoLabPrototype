@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createCircleInvitation } from "@server/data";
 import { parseAuthToken } from "@shared/auth";
+import { toNullableString } from "@shared/request";
 import { z } from "zod";
 
 const newInvitationSchema = z.object({
@@ -12,12 +13,14 @@ const newInvitationSchema = z.object({
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
-  const auth = parseAuthToken(req.headers.authorization);
+  const auth = parseAuthToken(toNullableString(req.headers.authorization));
   if (!auth || !auth.isAdmin) return res.status(401).json({ message: "Inicia sesión de personal para continuar." });
   const parsed = newInvitationSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: "Revisa los datos de la invitación e intenta de nuevo." });
   try {
-    const circleName = decodeURIComponent(req.query.circleName as string);
+    const rawCircleName = toNullableString(req.query.circleName);
+    if (!rawCircleName) return res.status(400).json({ message: "Falta el nombre del círculo." });
+    const circleName = decodeURIComponent(rawCircleName);
     const result = await createCircleInvitation(circleName, parsed.data);
     if (!result.ok) return res.status(404).json({ message: result.message });
     res.json(result.invitation);

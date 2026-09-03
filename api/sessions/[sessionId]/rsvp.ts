@@ -1,13 +1,15 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { reserveSession } from "@server/data";
 import { parseAuthToken } from "@shared/auth";
+import { toNullableString } from "@shared/request";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
   try {
-    const auth = parseAuthToken(req.headers.authorization);
+    const auth = parseAuthToken(toNullableString(req.headers.authorization));
     if (!auth || auth.isAdmin) return res.status(401).json({ message: "Inicia sesión para continuar." });
-    const sessionId = req.query.sessionId as string;
+    const sessionId = toNullableString(req.query.sessionId);
+    if (!sessionId) return res.status(400).json({ message: "Falta el identificador de la sesión." });
     const result = await reserveSession(auth.email, sessionId);
     if (!result) return res.status(404).json({ message: "Esa sesión demo no existe." });
     res.json(result);

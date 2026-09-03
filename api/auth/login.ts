@@ -1,7 +1,7 @@
 import { login } from "@server/data";
-import { parseAuthToken } from "@shared/auth";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-`n`nimport type { VercelRequest, VercelResponse } from "@vercel/node";`n`nexport default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
   try {
     const snapshot = await login(req.body);
@@ -13,4 +13,3 @@ import { parseAuthToken } from "@shared/auth";
     res.status(500).json({ message: "Error interno del servidor" });
   }
 }
-

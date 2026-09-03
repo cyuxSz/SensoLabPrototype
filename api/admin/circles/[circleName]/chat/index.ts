@@ -1,14 +1,17 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { getCircleChatForAdmin, postAnnouncementAsAdmin, deleteChatMessageAsAdmin } from "@server/data";
 import { parseAuthToken } from "@shared/auth";
+import { toNullableString } from "@shared/request";
 import { z } from "zod";
 
 const announcementSchema = z.object({ text: z.string().trim().min(1).max(500) });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const auth = parseAuthToken(req.headers.authorization);
+  const auth = parseAuthToken(toNullableString(req.headers.authorization));
   if (!auth || !auth.isAdmin) return res.status(401).json({ message: "Inicia sesión de personal para continuar." });
-  const circleName = decodeURIComponent(req.query.circleName as string);
+  const rawCircleName = toNullableString(req.query.circleName);
+  if (!rawCircleName) return res.status(400).json({ message: "Falta el nombre del círculo." });
+  const circleName = decodeURIComponent(rawCircleName);
 
   if (req.method === "GET") {
     try {
@@ -35,7 +38,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === "DELETE") {
-    const messageId = req.query.messageId as string;
+    const messageId = toNullableString(req.query.messageId);
+    if (!messageId) return res.status(400).json({ message: "Falta el identificador del mensaje." });
     try {
       const removed = await deleteChatMessageAsAdmin(circleName, messageId);
       if (!removed) return res.status(404).json({ message: "Ese mensaje no existe." });
