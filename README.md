@@ -243,6 +243,13 @@ ya obtenida para verla en 3D o AR.
 - Node.js 18 o superior (recomendado 20+)
 - npm 9 o superior
 
+## Deploy en Vercel
+
+- Configurar el proyecto con **Root Directory = repositorio raíz** (donde viven `api/`, `client/` y `vercel.json`).
+- El build de Vercel usa `npm run build` y publica `client/dist` como salida estática.
+- Las rutas `api/**/*.ts` se despliegan como Serverless Functions de Vercel.
+- La regla SPA en `vercel.json` solo reescribe rutas no-API a `index.html` para no interferir con `/api/*`.
+
 ## Cómo correrlo en tu PC (local)
 
 Desde la carpeta raíz `sensolab-passport/`:
