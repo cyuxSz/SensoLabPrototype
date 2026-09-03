@@ -61,16 +61,16 @@ export default function AdminDashboard({ onLogout, onBackToLanding }: AdminDashb
   }, []);
 
   useEffect(() => {
-    if (tab === "moderation" && moderationCircle) {
-      loadModerationChat(moderationCircle);
+    if (tab === "moderation") {
+      loadModerationChat();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, moderationCircle]);
+  }, [tab]);
 
-  async function loadModerationChat(circleName: string) {
+  async function loadModerationChat() {
     setModerationLoading(true);
     try {
-      const { messages } = await adminGetCircleChat(circleName);
+      const { messages } = await adminGetCircleChat();
       setModerationMessages(messages);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "No se pudo cargar el chat.");
@@ -84,12 +84,7 @@ export default function AdminDashboard({ onLogout, onBackToLanding }: AdminDashb
     setCreatingCircle(true);
     setError(null);
     try {
-      await adminCreateCircle({
-        name: newCircleName.trim(),
-        description: newCircleDescription.trim(),
-        funFacts: newCircleFunFacts.split("\n").map((line) => line.trim()).filter(Boolean),
-        limit: newCircleLimit,
-      });
+      await adminCreateCircle();
       setNewCircleName("");
       setNewCircleDescription("");
       setNewCircleFunFacts("");
@@ -104,16 +99,10 @@ export default function AdminDashboard({ onLogout, onBackToLanding }: AdminDashb
 
   async function handleCreateInvitation(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!invitationCircle) return;
     setCreatingInvitation(true);
     setError(null);
     try {
-      await adminCreateCircleInvitation(invitationCircle, {
-        title: invitationTitle.trim(),
-        description: invitationDescription.trim(),
-        spotsNeeded: invitationSpots,
-        incentive: invitationIncentive.trim(),
-      });
+      await adminCreateCircleInvitation();
       setInvitationTitle("");
       setInvitationDescription("");
       setInvitationSpots(10);
@@ -127,11 +116,10 @@ export default function AdminDashboard({ onLogout, onBackToLanding }: AdminDashb
     }
   }
 
-  async function handleDeleteMessage(messageId: string) {
-    if (!moderationCircle) return;
+  async function handleDeleteMessage() {
     try {
-      await adminDeleteChatMessage(moderationCircle, messageId);
-      setModerationMessages((current) => current.filter((message) => message.id !== messageId));
+      await adminDeleteChatMessage();
+      setModerationMessages((current) => current.filter((message) => message.id !== "mock"));
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "No se pudo eliminar el mensaje.");
     }
@@ -139,11 +127,10 @@ export default function AdminDashboard({ onLogout, onBackToLanding }: AdminDashb
 
   async function handlePostAnnouncement(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!moderationCircle || !announcementDraft.trim()) return;
     setPostingAnnouncement(true);
     setError(null);
     try {
-      const message = await adminPostAnnouncement(moderationCircle, announcementDraft.trim());
+      const message = await adminPostAnnouncement();
       setModerationMessages((current) => [...current, message]);
       setAnnouncementDraft("");
     } catch (requestError) {

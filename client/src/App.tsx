@@ -173,56 +173,47 @@ export default function App() {
     return newBadge;
   }
 
-  async function handleReserve(sessionId: string) {
-    setBusySessionId(sessionId);
+  async function handleReserve() {
     setError(null);
     try {
-      setSnapshot(await reserveSession(sessionId));
+      setSnapshot(await reserveSession());
       setNotice("Tu lugar quedó reservado.");
     } catch (requestError) {
       if (!guardUnauthorized(requestError)) {
         setError(requestError instanceof Error ? requestError.message : "No se pudo reservar la sesión.");
       }
-    } finally {
-      setBusySessionId(null);
     }
   }
 
-  async function handleReserveCircleInvitation(circleName: string, invitationId: string) {
-    setBusyInvitationId(invitationId);
+  async function handleReserveCircleInvitation() {
     setError(null);
     try {
-      setSnapshot(await reserveCircleInvitation(circleName, invitationId));
+      setSnapshot(await reserveCircleInvitation());
       setNotice("Confirmaste tu lugar en la invitación de tu círculo.");
     } catch (requestError) {
       if (!guardUnauthorized(requestError)) {
         setError(requestError instanceof Error ? requestError.message : "No se pudo confirmar la invitación.");
       }
-    } finally {
-      setBusyInvitationId(null);
     }
   }
 
-  async function handleJoinAdditionalCircle(circleName: string) {
-    setBusyJoinCircleName(circleName);
+  async function handleJoinAdditionalCircle() {
     setError(null);
     try {
-      setSnapshot(await joinCircle(circleName));
-      setNotice(`¡Te uniste a ${circleName}!`);
+      setSnapshot(await joinCircle());
+      setNotice("¡Te uniste al círculo!");
     } catch (requestError) {
       if (!guardUnauthorized(requestError)) {
         setError(requestError instanceof Error ? requestError.message : "No se pudo unir a ese círculo.");
       }
-    } finally {
-      setBusyJoinCircleName(null);
     }
   }
 
-  async function handleCheckIn(code: string) {
+  async function handleCheckIn() {
     setCheckInBusy(true);
     setError(null);
     try {
-      const updated = await submitCheckIn(code);
+      const updated = await submitCheckIn();
       const newBadge = checkForNewBadge(snapshot, updated);
       setSnapshot(updated);
       setCheckInOpen(false);
@@ -238,11 +229,11 @@ export default function App() {
     }
   }
 
-  async function handleProfileSave(update: ProfileUpdate) {
+  async function handleProfileSave() {
     setProfileSaving(true);
     setError(null);
     try {
-      setSnapshot(await updateProfile(update));
+      setSnapshot(await updateProfile());
       setNotice("Tu perfil se actualizó correctamente.");
     } catch (requestError) {
       if (!guardUnauthorized(requestError)) {
@@ -253,11 +244,10 @@ export default function App() {
     }
   }
 
-  async function handleChallenge(challengeId: string) {
-    setBusyChallengeId(challengeId);
+  async function handleChallenge() {
     setError(null);
     try {
-      const updated = await completeChallenge(challengeId);
+      const updated = await completeChallenge();
       const newBadge = checkForNewBadge(snapshot, updated);
       setSnapshot(updated);
       if (!newBadge) {
@@ -272,10 +262,10 @@ export default function App() {
     }
   }
 
-  async function handleReact(circleName: string, messageId: string, emoji: string) {
+  async function handleReact() {
     setError(null);
     try {
-      setSnapshot(await reactToMessage(circleName, messageId, emoji));
+      setSnapshot(await reactToMessage());
     } catch (requestError) {
       if (!guardUnauthorized(requestError)) {
         setError(requestError instanceof Error ? requestError.message : "No se pudo registrar tu reacción.");
@@ -283,19 +273,16 @@ export default function App() {
     }
   }
 
-  async function handleRedeemReward(rewardId: string) {
-    setBusyRewardId(rewardId);
+  async function handleRedeemReward() {
     setError(null);
     try {
-      const result = await apiRedeemReward(rewardId);
+      const result = await redeemReward();
       setSnapshot(result.snapshot);
       setRedeemedCelebration({ reward: result.reward, code: result.code });
     } catch (requestError) {
       if (!guardUnauthorized(requestError)) {
         setError(requestError instanceof Error ? requestError.message : "No se pudo canjear la recompensa.");
       }
-    } finally {
-      setBusyRewardId(null);
     }
   }
 
@@ -322,7 +309,7 @@ export default function App() {
     setAdminBusy(true);
     setAdminError(null);
     try {
-      const result = await apiAdminLogin({ email, password });
+      const result = await adminLogin({ email, password });
       localStorage.setItem("adminToken", result.token);
       setScreen("admin-portal");
     } catch (requestError) {
