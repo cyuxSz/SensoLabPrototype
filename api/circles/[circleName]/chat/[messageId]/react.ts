@@ -1,5 +1,7 @@
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { toggleReaction } from "@server/data";
-import { parseAuthToken, REACTION_EMOJIS } from "@shared/auth";
+import { parseAuthToken } from "@shared/auth";
+import { REACTION_EMOJIS } from "@shared/types";
 import { z } from "zod";
 
 const reactSchema = z.object({ emoji: z.enum(REACTION_EMOJIS) });
@@ -8,7 +10,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
   const parsed = reactSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: "Reacción no válida." });
-  
   try {
     const auth = parseAuthToken(req.headers.authorization);
     if (!auth || auth.isAdmin) return res.status(401).json({ message: "Inicia sesión para continuar." });

@@ -1,3 +1,4 @@
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { signup } from "@server/data";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

@@ -1,3 +1,4 @@
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { redeemReward } from "@server/data";
 import { parseAuthToken } from "@shared/auth";
 

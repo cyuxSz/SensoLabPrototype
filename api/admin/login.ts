@@ -1,3 +1,4 @@
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { adminLogin } from "@server/data";
 import { z } from "zod";
 
