@@ -276,7 +276,7 @@ export default function App() {
   async function handleRedeemReward() {
     setError(null);
     try {
-      const result = await redeemReward();
+      const result = await apiRedeemReward();
       setSnapshot(result.snapshot);
       setRedeemedCelebration({ reward: result.reward, code: result.code });
     } catch (requestError) {
@@ -309,7 +309,7 @@ export default function App() {
     setAdminBusy(true);
     setAdminError(null);
     try {
-      const result = await adminLogin({ email, password });
+      const result = await apiAdminLogin({ email, password });
       localStorage.setItem("adminToken", result.token);
       setScreen("admin-portal");
     } catch (requestError) {

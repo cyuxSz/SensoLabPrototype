@@ -371,7 +371,7 @@ export default function AdminDashboard({ onLogout, onBackToLanding }: AdminDashb
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleDeleteMessage(message.id)}
+                      onClick={handleDeleteMessage}
                       className="shrink-0 rounded-lg p-1.5 text-senso-ink/40 hover:bg-senso-orange/10 hover:text-senso-orange-dark"
                       aria-label="Eliminar mensaje"
                     >
